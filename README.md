@@ -1,1 +1,1 @@
-# mfl-ticker
+# Python wrapper for MyFantasyLeague API.
