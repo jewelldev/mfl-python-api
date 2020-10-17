@@ -1,9 +1,9 @@
-from mfl_request import MFLRequest, MFLLoginRequest
+from mfl_request import MFLRequest, MFLLoginRequest, MFLRostersRequest
 from mfl_response import MFLResponse
 
 class MyFantasyLeagueAPISession():
 
-    host = "api.myfantasyleague.com"
+    host = "www67.myfantasyleague.com"
     protocol = "https"
 
     def __init__(self, year, league_id="", username="", password=""):
@@ -34,12 +34,20 @@ class MyFantasyLeagueAPISession():
         return new_instance
 
     def login(self):
-        response = self.login_with_credentials(self.username, self.password, self.year)
+        response = self.login_with_credentials(self.username, self.password)
         self.user_cookie = response.cookie
-        #print(self.user_cookie)
+        print(self.user_cookie + " " + str(response.status_code))
 
-    def login_with_credentials(self, username, password, year=None):       
-        request = MFLLoginRequest(username=username, password=password, year=year)
+    def login_with_credentials(self, username, password):       
+        request = MFLLoginRequest(username=username, password=password)
+        response = request.make_request()
+        return response
+
+    def rosters(self, league_id=None, franchise=None, week=None):
+        league_id = league_id if league_id is not None else self.league_id
+        request = MFLRostersRequest(league_id, franchise, week)
+        #print(request.request_url)
+        #print(request.request_params)
         response = request.make_request()
         return response
 

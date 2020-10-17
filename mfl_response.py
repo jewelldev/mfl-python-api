@@ -1,12 +1,32 @@
 import re
 
+### MFLResponse ###############################################################
+
 class MFLResponse:
     """Class to manage MFL responses"""
     def __init__(self, mfl_response):
         self.mfl_response = mfl_response
         self.mfl_response_text = mfl_response.text
+        self.status_code = mfl_response.status_code
+        # TO DO this should be a descriptor 
 
 # TO DO what additional info a generic response has
+
+##############################################################################
+
+#### MFLRostersResponse ######################################################
+
+class MFLRostersResponse(MFLResponse):
+    """Class to manage MFL rosters response"""
+
+    # TO DO capture this in JSON
+
+    def __init__(self, mfl_response):
+        super().__init__(mfl_response)
+
+##############################################################################
+
+#### MFLLoginResponse ########################################################
 
 class MFLLoginResponseCookie:
     """A non-data descriptor that returns a formatted MFL login request URL string"""
@@ -30,3 +50,5 @@ class MFLLoginResponse(MFLResponse):
 
     def __init__(self, mfl_response):
         super().__init__(mfl_response)
+
+##############################################################################
