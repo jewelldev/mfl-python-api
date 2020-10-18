@@ -1,4 +1,4 @@
-from mfl_request import MFLRequest, MFLLoginRequest, MFLRostersRequest
+from mfl_request import MFLRequest, MFLLoginRequest, MFLRostersRequest, MFLPlayersRequest
 from mfl_response import MFLResponse
 
 class MyFantasyLeagueAPISession():
@@ -48,4 +48,10 @@ class MyFantasyLeagueAPISession():
         request = MFLRostersRequest(league_id, franchise, week)
         response = request.make_request()
         return response.rosters
+
+    def players(self, league_id=None, details=None, since=None, players=None):
+        league_id = league_id if league_id is not None else self.league_id
+        request = MFLPlayersRequest(league_id, details, since, players)
+        response = request.make_request()
+        return response.players
 

@@ -1,4 +1,4 @@
-from mfl_response import MFLLoginResponse, MFLRostersResponse
+from mfl_response import MFLLoginResponse, MFLRostersResponse, MFLPlayersResponse
 import requests
 
 ### MFLRequest ###############################################################
@@ -38,7 +38,7 @@ class MFLExportRequest(MFLRequest):
 #### MFLRostersRequest #######################################################
 
 class MFLRostersRequestParams:
-    """A non-data descriptor that returns MFL login request params as a dictionary"""
+    """A non-data descriptor that returns MFL rosters request params as a dictionary"""
     def __get__(self, obj, type):
         params = {'TYPE' : obj.request_type, 'L' : obj.league_id}
         if obj.franchise is not None:
@@ -62,6 +62,41 @@ class MFLRostersRequest(MFLExportRequest):
     def make_request(self):
         response = super().make_request()
         return MFLRostersResponse(response)
+
+##############################################################################
+
+#### MFLPlayersRequest #######################################################
+
+class MFLPlayersRequestParams:
+    """A non-data descriptor that returns MFL players request params as a dictionary"""
+    def __get__(self, obj, type):
+        params = {'TYPE' : obj.request_type}
+        if obj.league_id is not None:
+            params['L'] = obj.league_id
+        if obj.details is not None:
+            params['DETAILS'] = obj.details
+        if obj.since is not None:
+            params['SINCE'] = obj.since
+        if obj.players is not None:
+            params['PLAYERS'] = obj.players
+        params['JSON'] = obj.json
+        return params
+
+class MFLPlayersRequest(MFLExportRequest):
+    """Class to manage MFL players request"""
+    request_type = "players"
+    request_params = MFLPlayersRequestParams()
+
+    def __init__(self, league_id=None, details=None, since=None, players=None):
+        self.league_id = league_id
+        self.details = details
+        self.since = since
+        self.players = players
+        self.json = 1
+
+    def make_request(self):
+        response = super().make_request()
+        return MFLPlayersResponse(response)
 
 ##############################################################################
 

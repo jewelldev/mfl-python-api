@@ -54,6 +54,34 @@ class MFLRostersResponse(MFLExportResponse):
 
 ##############################################################################
 
+#### MFLPlayersResponse ######################################################
+
+class PlayersResponseDescriptor():
+    
+    def __get__(self, obj, type):
+        
+        players_json_raw = dict_digger.dig(obj.json_response, 'players', 'player')
+
+        player_dict = {}
+        for player in players_json_raw:
+
+            player_dict[ player['id'] ] = { 'name' :  player['name'], 
+                                            'position' : player['position'], 
+                                            'team' : player['team'],
+                                            'status' : player.get('status', '') }
+
+        return player_dict
+
+
+class MFLPlayersResponse(MFLExportResponse):
+    
+    players = PlayersResponseDescriptor() 
+    
+    def __init__(self, response):
+        super().__init__(response)
+
+##############################################################################
+
 #### MFLLoginResponse ########################################################
 
 class MFLLoginResponseCookie:
