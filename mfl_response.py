@@ -1,28 +1,56 @@
 import re
+import dict_digger
 
 ### MFLResponse ###############################################################
 
 class MFLResponse:
     """Class to manage MFL responses"""
-    def __init__(self, mfl_response):
-        self.mfl_response = mfl_response
-        self.mfl_response_text = mfl_response.text
-        self.status_code = mfl_response.status_code
+    def __init__(self, response):
+        self.raw_response = response
+        self.text = response.text
+        self.status_code = response.status_code
         # TO DO this should be a descriptor 
 
 # TO DO what additional info a generic response has
 
 ##############################################################################
 
+### MFLExportResponse ########################################################
+
+class MFLExportResponse(MFLResponse):
+    """Class to manage MFL Export responses"""
+    def __init__(self, response):
+        self.json_response = response.json()
+        super().__init__(response)
+
+##############################################################################
+
 #### MFLRostersResponse ######################################################
 
-class MFLRostersResponse(MFLResponse):
-    """Class to manage MFL rosters response"""
+class RostersResponseDescriptor():
+    
+    def __get__(self, obj, type):
+        
+        rosters_json_raw = dict_digger.dig(obj.json_response, 'rosters', 'franchise')
 
-    # TO DO capture this in JSON
+        franchise_dict = {}
+        for franchise in rosters_json_raw:
+            
+            player_dict = {}
+            for player in franchise['player']:
+                player_dict[ player['id'] ] = { 'status' : player['status'], 'salary' : player['salary'] }
 
-    def __init__(self, mfl_response):
-        super().__init__(mfl_response)
+            franchise_dict[ franchise['id'] ] = { 'week' :  franchise['week'], 'players' : player_dict }
+
+        return franchise_dict
+
+
+class MFLRostersResponse(MFLExportResponse):
+    
+    rosters = RostersResponseDescriptor() 
+    
+    def __init__(self, response):
+        super().__init__(response)
 
 ##############################################################################
 
@@ -35,7 +63,7 @@ class MFLLoginResponseCookie:
     regex_pattern = 'MFL_USER_ID="([^"]*)">OK'
 
     def __get__(self, obj, type):
-        cookie =  re.search(self.regex_pattern, obj.mfl_response_text).group(1)
+        cookie =  re.search(self.regex_pattern, obj.text).group(1)
         
         if cookie is not None:
             return cookie
@@ -48,7 +76,7 @@ class MFLLoginResponse(MFLResponse):
 
     cookie = MFLLoginResponseCookie()
 
-    def __init__(self, mfl_response):
-        super().__init__(mfl_response)
+    def __init__(self, response):
+        super().__init__(response)
 
 ##############################################################################

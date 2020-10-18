@@ -46,8 +46,6 @@ class MyFantasyLeagueAPISession():
     def rosters(self, league_id=None, franchise=None, week=None):
         league_id = league_id if league_id is not None else self.league_id
         request = MFLRostersRequest(league_id, franchise, week)
-        #print(request.request_url)
-        #print(request.request_params)
         response = request.make_request()
-        return response
+        return response.rosters
 

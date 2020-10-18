@@ -45,7 +45,7 @@ class MFLRostersRequestParams:
             params['FRANCHISE'] = obj.franchise
         if obj.week is not None:
             params['W'] = obj.week
-        params['JSON'] = 1
+        params['JSON'] = obj.json
         return params
 
 class MFLRostersRequest(MFLExportRequest):
@@ -57,6 +57,7 @@ class MFLRostersRequest(MFLExportRequest):
         self.league_id = league_id
         self.franchise = franchise
         self.week = week
+        self.json = 1
 
     def make_request(self):
         response = super().make_request()
