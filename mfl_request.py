@@ -1,4 +1,4 @@
-from mfl_response import MFLLoginResponse, MFLRostersResponse, MFLPlayersResponse
+from mfl_response import MFLLoginResponse, MFLRostersResponse, MFLPlayersResponse, MFLLeagueResponse
 import requests
 
 ### MFLRequest ###############################################################
@@ -17,12 +17,13 @@ class MFLRequest:
     protocol=""
     host=""
     default_year=""
+    user_cookie=""
     request_url = MFLRequestUrl()
 
     def make_request(self):
         print(self.request_url)
         print(self.request_params)
-        return requests.post(self.request_url, self.request_params)
+        return requests.post(url=self.request_url, data=self.request_params, cookies={'MFL_USER_ID' : self.user_cookie})
 
 ##############################################################################
 
@@ -97,6 +98,29 @@ class MFLPlayersRequest(MFLExportRequest):
     def make_request(self):
         response = super().make_request()
         return MFLPlayersResponse(response)
+
+##############################################################################
+
+#### MFLLeagueRequest ########################################################
+
+class MFLLeagueRequestParams:
+    """A non-data descriptor that returns MFL league request params as a dictionary"""
+    def __get__(self, obj, type):
+        params = {'TYPE' : obj.request_type, 'L' : obj.league_id, 'JSON' : obj.json}
+        return params
+
+class MFLLeagueRequest(MFLExportRequest):
+    """Class to manage MFL league request"""
+    request_type = "league"
+    request_params = MFLLeagueRequestParams()
+
+    def __init__(self, league_id):
+        self.league_id = league_id
+        self.json = 1
+
+    def make_request(self):
+        response = super().make_request()
+        return MFLLeagueResponse(response)
 
 ##############################################################################
 

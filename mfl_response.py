@@ -82,6 +82,35 @@ class MFLPlayersResponse(MFLExportResponse):
 
 ##############################################################################
 
+#### MFLLeagueResponse #######################################################
+
+class FranchisesResponseDescriptor():
+    
+    def __get__(self, obj, type):
+        
+        franchises_json_raw = dict_digger.dig(obj.json_response, 'league', 'franchises', 'franchise')
+
+        franchise_dict = {}
+        for franchise in franchises_json_raw:
+            
+            franchise_id = franchise['id']
+            franchise_dict[franchise_id] = {}
+            for key in franchise:
+                if(key is not 'id'):
+                    franchise_dict[franchise_id][key] = franchise[key]
+
+        return franchise_dict
+
+
+class MFLLeagueResponse(MFLExportResponse):
+    
+    franchises = FranchisesResponseDescriptor() 
+    
+    def __init__(self, response):
+        super().__init__(response)
+
+##############################################################################
+
 #### MFLLoginResponse ########################################################
 
 class MFLLoginResponseCookie:
