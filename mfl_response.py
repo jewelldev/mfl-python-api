@@ -62,6 +62,10 @@ class PlayersResponseDescriptor():
         
         players_json_raw = dict_digger.dig(obj.json_response, 'players', 'player')
 
+        # TO DO handle this better
+        if players_json_raw is None:
+            return {}
+
         player_dict = {}
         for player in players_json_raw:
 
@@ -105,6 +109,49 @@ class FranchisesResponseDescriptor():
 class MFLLeagueResponse(MFLExportResponse):
     
     franchises = FranchisesResponseDescriptor() 
+    
+    def __init__(self, response):
+        super().__init__(response)
+
+##############################################################################
+
+#### MFLLiveScoringResponse ##################################################
+
+class FranchiseLiveScoringResponseDescriptor():
+    
+    def __get__(self, obj, type):
+        
+        matchups_raw_json = dict_digger.dig(obj.json_response, 'liveScoring', 'matchup')
+
+        franchise_dict = {}
+        for matchup in matchups_raw_json:
+
+            franchise_pair_json = dict_digger.dig(matchup, 'franchise')
+            #print(franchise_pair_json)
+            for franchise in franchise_pair_json:
+                players = dict_digger.dig(franchise, 'players', 'player')
+                player_dict = {}
+                for player in players:
+
+                    player_id = player['id']
+                    player_dict[player_id] = {}
+                    for key in player:
+                        if(key is not 'id'):
+                            player_dict[player_id][key] = player[key]
+
+                franchise_dict[ franchise['id'] ] = { 'playersCurrentlyPlaying' : franchise['playersCurrentlyPlaying'], 
+                                                        'isHome' : franchise['isHome'],
+                                                        'gameSecondsRemaining' : franchise['gameSecondsRemaining'], 
+                                                        'playersYetToPlay' : franchise['playersYetToPlay'], 
+                                                        'score' : franchise['score'], 
+                                                        'players' : player_dict }
+
+        return franchise_dict
+
+
+class MFLLiveScoringResponse(MFLExportResponse):
+    
+    franchise_live_scoring = FranchiseLiveScoringResponseDescriptor() 
     
     def __init__(self, response):
         super().__init__(response)

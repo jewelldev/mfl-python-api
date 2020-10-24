@@ -1,4 +1,4 @@
-from mfl_response import MFLLoginResponse, MFLRostersResponse, MFLPlayersResponse, MFLLeagueResponse
+from mfl_response import MFLLoginResponse, MFLRostersResponse, MFLPlayersResponse, MFLLeagueResponse, MFLLiveScoringResponse
 import requests
 
 ### MFLRequest ###############################################################
@@ -121,6 +121,36 @@ class MFLLeagueRequest(MFLExportRequest):
     def make_request(self):
         response = super().make_request()
         return MFLLeagueResponse(response)
+
+##############################################################################
+
+#### MFLLiveScoringRequest ###################################################
+
+class MFLLiveScoringRequestParams:
+    """A non-data descriptor that returns MFL live scoring request params as a dictionary"""
+    def __get__(self, obj, type):
+        params = {'TYPE' : obj.request_type, 'L' : obj.league_id}
+        if obj.week is not None:
+            params['W'] = obj.week
+        if obj.details:
+            params['DETAILS'] = 1
+        params['JSON'] = obj.json
+        return params
+
+class MFLLiveScoringRequest(MFLExportRequest):
+    """Class to manage MFL live scoring request"""
+    request_type = "liveScoring"
+    request_params = MFLLiveScoringRequestParams()
+
+    def __init__(self, league_id, week: int=None, details: bool=False):
+        self.league_id = league_id
+        self.week = week
+        self.details = details
+        self.json = 1
+
+    def make_request(self):
+        response = super().make_request()
+        return MFLLiveScoringResponse(response)
 
 ##############################################################################
 
