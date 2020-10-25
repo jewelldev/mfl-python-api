@@ -3,15 +3,48 @@ import dict_digger
 
 ### MFLResponse ###############################################################
 
+class ResponseDescriptor():
+    """Non-data descriptor to retrieve nested values in instance's json_response"""
+    def __init__(self, *path):
+        self.path = path
+
+    def __get__(self, obj, type):
+        try:
+            return dict_digger.dig(obj.json_response, *self.path, fail=True)
+        except(IndexError, KeyError):
+            raise AttributeError("Item not present in instance attribute 'json_response'")
+
+class ResponseJsonDescriptor():
+    """Non-data descriptor to retrieve JSON object from the instance's raw_response 
+        (if the raw_response was written in JSON format, if not it returns an empty dict)
+    """
+    def __get__(self, obj, type):
+        try:
+            return obj.raw_response.json()
+        except:
+            return {}
+
+class ResponseStatusCodeDescriptor():
+    """Non-data descriptor to retrieve status code from the instance's raw_response 
+        that indicates the status of the response (200 is OK, 404 is Not Found)
+    """
+    def __get__(self, obj, type):
+        return obj.raw_response.status_code
+
 class MFLResponse:
     """Class to manage MFL responses"""
-    def __init__(self, response):
-        self.raw_response = response
-        self.text = response.text
-        self.status_code = response.status_code
-        # TO DO this should be a descriptor 
 
-# TO DO what additional info a generic response has
+    json_response = ResponseJsonDescriptor()
+    status_code = ResponseStatusCodeDescriptor()
+
+    def __init__(self, response):
+        """Init MFLResponse class
+        
+        Args:
+            raw_response: requests.Response() Object contains the server's response to the HTTP request.
+
+        """
+        self.raw_response = response
 
 ##############################################################################
 
@@ -20,7 +53,11 @@ class MFLResponse:
 class MFLExportResponse(MFLResponse):
     """Class to manage MFL Export responses"""
     def __init__(self, response):
-        self.json_response = response.json()
+        try:
+            response.json()
+        except(AttributeError):
+            raise ValueError("response is not valid JSON")
+
         super().__init__(response)
 
 ##############################################################################
@@ -48,6 +85,7 @@ class RostersResponseDescriptor():
 class MFLRostersResponse(MFLExportResponse):
     
     rosters = RostersResponseDescriptor() 
+    week = ResponseDescriptor('rosters', 'franchise', 0, 'week')
     
     def __init__(self, response):
         super().__init__(response)
@@ -80,7 +118,8 @@ class PlayersResponseDescriptor():
 class MFLPlayersResponse(MFLExportResponse):
     
     players = PlayersResponseDescriptor() 
-    
+    timestamp = ResponseDescriptor('players', 'timestamp')
+
     def __init__(self, response):
         super().__init__(response)
 
@@ -152,7 +191,34 @@ class FranchiseLiveScoringResponseDescriptor():
 class MFLLiveScoringResponse(MFLExportResponse):
     
     franchise_live_scoring = FranchiseLiveScoringResponseDescriptor() 
+    week = ResponseDescriptor('liveScoring', 'week')
     
+    def __init__(self, response):
+        super().__init__(response)
+
+##############################################################################
+
+#### MFLPlayerScoresResponse #################################################
+
+class PlayerScoresResponseDescriptor():
+    
+    def __get__(self, obj, type):
+        
+        player_scores_json_raw = dict_digger.dig(obj.json_response, 'playerScores', 'playerScore')
+
+        player_dict = {}
+        for player in player_scores_json_raw:
+
+            player_id = player['id']
+            player_dict[player_id] = { 'isAvailable' : player['isAvailable'], 'score' : player['score'] }
+
+        return player_dict
+
+class MFLPlayerScoresResponse(MFLExportResponse):
+    
+    player_scores = PlayerScoresResponseDescriptor() 
+    week = ResponseDescriptor('playerScores', 'week')
+
     def __init__(self, response):
         super().__init__(response)
 

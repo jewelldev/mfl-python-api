@@ -1,4 +1,4 @@
-from mfl_response import MFLLoginResponse, MFLRostersResponse, MFLPlayersResponse, MFLLeagueResponse, MFLLiveScoringResponse
+from mfl_response import MFLLoginResponse, MFLRostersResponse, MFLPlayersResponse, MFLLeagueResponse, MFLLiveScoringResponse, MFLPlayerScoresResponse
 import requests
 
 ### MFLRequest ###############################################################
@@ -54,7 +54,7 @@ class MFLRostersRequest(MFLExportRequest):
     request_type = "rosters"
     request_params = MFLRostersRequestParams()
 
-    def __init__(self, league_id, franchise=None, week=None):
+    def __init__(self, league_id: str, franchise: str=None, week: int=None):
         self.league_id = league_id
         self.franchise = franchise
         self.week = week
@@ -74,8 +74,8 @@ class MFLPlayersRequestParams:
         params = {'TYPE' : obj.request_type}
         if obj.league_id is not None:
             params['L'] = obj.league_id
-        if obj.details is not None:
-            params['DETAILS'] = obj.details
+        if obj.details:
+            params['DETAILS'] = 1
         if obj.since is not None:
             params['SINCE'] = obj.since
         if obj.players is not None:
@@ -88,7 +88,7 @@ class MFLPlayersRequest(MFLExportRequest):
     request_type = "players"
     request_params = MFLPlayersRequestParams()
 
-    def __init__(self, league_id=None, details=None, since=None, players=None):
+    def __init__(self, league_id: str=None, details: bool=False, since: int=None, players: str=None):
         self.league_id = league_id
         self.details = details
         self.since = since
@@ -114,7 +114,7 @@ class MFLLeagueRequest(MFLExportRequest):
     request_type = "league"
     request_params = MFLLeagueRequestParams()
 
-    def __init__(self, league_id):
+    def __init__(self, league_id: str):
         self.league_id = league_id
         self.json = 1
 
@@ -142,7 +142,7 @@ class MFLLiveScoringRequest(MFLExportRequest):
     request_type = "liveScoring"
     request_params = MFLLiveScoringRequestParams()
 
-    def __init__(self, league_id, week: int=None, details: bool=False):
+    def __init__(self, league_id: str, week: int=None, details: bool=False):
         self.league_id = league_id
         self.week = week
         self.details = details
@@ -151,6 +151,48 @@ class MFLLiveScoringRequest(MFLExportRequest):
     def make_request(self):
         response = super().make_request()
         return MFLLiveScoringResponse(response)
+
+##############################################################################
+
+#### MFLPlayerScoresRequest ##################################################
+
+class MFLPlayerScoresRequestParams:
+    """A non-data descriptor that returns MFL player scores request params as a dictionary"""
+    def __get__(self, obj, type):
+        params = {'TYPE' : obj.request_type, 'L' : obj.league_id}
+        if obj.week is not None:
+            params['W'] = obj.week
+        #if obj.year is not None:
+        #    params['YEAR'] = obj.year
+        if obj.players is not None:
+            params['PLAYERS'] = obj.players
+        if obj.status is not None:
+            params['STATUS'] = obj.status
+        if obj.rules:
+            params['RULES'] = 1
+        if obj.count is not None:
+            params['COUNT'] = obj.count
+        params['JSON'] = obj.json
+        return params
+
+class MFLPlayerScoresRequest(MFLExportRequest):
+    """Class to manage MFL player scores request"""
+    request_type = "playerScores"
+    request_params = MFLPlayerScoresRequestParams()
+
+    def __init__(self, league_id: str, week: int=None, year: int=None, players: str=None, status: str=None, rules: bool=False, count: int=None):
+        self.league_id = league_id
+        self.week = week
+        self.year = year # TO DO ignored, MFLRequest.default_year always used
+        self.players = players
+        self.status = status
+        self.rules = rules
+        self.count = count
+        self.json = 1
+
+    def make_request(self):
+        response = super().make_request()
+        return MFLPlayerScoresResponse(response)
 
 ##############################################################################
 
