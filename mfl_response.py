@@ -139,7 +139,7 @@ class FranchisesResponseDescriptor():
             franchise_id = franchise['id']
             franchise_dict[franchise_id] = {}
             for key in franchise:
-                if(key is not 'id'):
+                if(key != 'id'):
                     franchise_dict[franchise_id][key] = franchise[key]
 
         return franchise_dict
@@ -175,7 +175,7 @@ class FranchiseLiveScoringResponseDescriptor():
                     player_id = player['id']
                     player_dict[player_id] = {}
                     for key in player:
-                        if(key is not 'id'):
+                        if(key != 'id'):
                             player_dict[player_id][key] = player[key]
 
                 franchise_dict[ franchise['id'] ] = { 'playersCurrentlyPlaying' : franchise['playersCurrentlyPlaying'], 

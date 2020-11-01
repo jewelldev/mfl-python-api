@@ -146,6 +146,7 @@ class MyFantasyLeagueAPISession():
         league_id = league_id if league_id is not None else self.league_id
         year = year if year is not None else self.year
 
+        # TO DO when specifying players this breaks
         request = MFLPlayerScoresRequest(league_id, week, year, players, status, rules, count)
         response = request.make_request()
         return response
